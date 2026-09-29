@@ -1,0 +1,217 @@
+<!doctype html>
+<!-- quebec-fees — Auteur : Aurélien Moote - Moo - 2026 — Licence MIT -->
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Quebec Fees — Taxes & pourboire</title>
+  <meta name="description" content="Calculateur de taxes du Québec (TPS + TVQ) avec pourboire en % ou en $, partage de facture, mode panier et calcul inversé.">
+  <meta name="author" content="Aurélien Moote - Moo - 2026">
+  <meta name="theme-color" content="#1b4d9b">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="36" height="36">
+      <div>
+        <h1>Quebec Fees</h1>
+        <p class="tagline" data-i18n="tagline">Taxes, pourboire et partage en un coup d'œil</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="langBtn" class="icon-btn" type="button" data-i18n-aria="switchLang">EN</button>
+      <button id="themeBtn" class="icon-btn" type="button" data-i18n-aria="switchTheme">◐</button>
+      <button id="settingsBtn" class="icon-btn" type="button" data-i18n-aria="settings">⚙</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="col col-input">
+      <div class="card">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" data-mode="quick" data-i18n="modeQuick">Rapide</button>
+          <button type="button" role="tab" data-mode="cart" data-i18n="modeCart">Panier</button>
+          <button type="button" role="tab" data-mode="reverse" data-i18n="modeReverse">Inverse</button>
+        </div>
+
+        <div class="pane" data-pane="quick">
+          <label class="field big" for="amount">
+            <span data-i18n="amountLabel">Montant avant taxes</span>
+            <span class="money">
+              <input id="amount" type="text" inputmode="decimal" autocomplete="off" data-i18n-ph="zero">
+              <span class="unit">$</span>
+            </span>
+          </label>
+          <p class="hint" id="exprHint" data-i18n="exprHint">Astuce : tapez 12,50+8 pour additionner plusieurs montants.</p>
+        </div>
+
+        <div class="pane" data-pane="cart" hidden>
+          <div class="items-head">
+            <span data-i18n="itemName">Article</span>
+            <span data-i18n="itemQty">Qté</span>
+            <span data-i18n="itemPrice">Prix</span>
+            <span data-i18n="itemTaxable" title="">Tx</span>
+            <span></span>
+          </div>
+          <div id="items"></div>
+          <button id="addItem" class="btn ghost full" type="button" data-i18n="addItem">+ Ajouter un article</button>
+          <p class="hint" data-i18n="cartHint">Décochez « Tx » pour un article détaxé (ex. épicerie de base). Un prix négatif sert de rabais.</p>
+        </div>
+
+        <div class="pane" data-pane="reverse" hidden>
+          <label class="field big" for="revTotal">
+            <span data-i18n="revLabel">Montant total payé (taxes incluses)</span>
+            <span class="money">
+              <input id="revTotal" type="text" inputmode="decimal" autocomplete="off" data-i18n-ph="zero">
+              <span class="unit">$</span>
+            </span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="revIncludeTip">
+            <span data-i18n="revIncludeTip">Ce total inclut aussi le pourboire</span>
+          </label>
+          <p class="hint" data-i18n="revHint">Retrouvez le prix avant taxes à partir d'un reçu, ou le budget maximal pour un total donné.</p>
+        </div>
+      </div>
+
+      <div class="card" id="tipCard">
+        <div class="card-head">
+          <h2 data-i18n="tipTitle">Pourboire</h2>
+          <div class="seg" id="tipType" role="group">
+            <button type="button" data-v="percent">%</button>
+            <button type="button" data-v="fixed">$</button>
+          </div>
+        </div>
+        <div id="tipPercentBox">
+          <div class="chips" id="tipPresets"></div>
+          <label class="field" for="tipPercent">
+            <span data-i18n="tipCustom">Pourcentage personnalisé</span>
+            <span class="money">
+              <input id="tipPercent" type="text" inputmode="decimal" autocomplete="off" placeholder="15">
+              <span class="unit">%</span>
+            </span>
+          </label>
+        </div>
+        <div id="tipFixedBox" hidden>
+          <label class="field" for="tipFixed">
+            <span data-i18n="tipFixed">Montant fixe</span>
+            <span class="money">
+              <input id="tipFixed" type="text" inputmode="decimal" autocomplete="off" data-i18n-ph="zero">
+              <span class="unit">$</span>
+            </span>
+          </label>
+        </div>
+        <div class="row-between" id="tipBaseRow">
+          <span class="muted" data-i18n="tipBase">Calculé sur</span>
+          <div class="seg" id="tipBase" role="group">
+            <button type="button" data-v="pretax" data-i18n="pretax">Avant taxes</button>
+            <button type="button" data-v="posttax" data-i18n="posttax">Après taxes</button>
+          </div>
+        </div>
+        <button id="roundTipBtn" class="btn ghost full" type="button" data-i18n="roundTip">Ajuster le pourboire pour un total rond</button>
+      </div>
+
+      <div class="card" id="splitCard">
+        <div class="row-between">
+          <h2 data-i18n="splitTitle">Partager la facture</h2>
+          <div class="stepper">
+            <button id="splitMinus" type="button" aria-label="-1">−</button>
+            <input id="split" type="text" inputmode="numeric" value="1" aria-label="Personnes">
+            <button id="splitPlus" type="button" aria-label="+1">+</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="col col-result">
+      <div class="card result" id="resultCard" aria-live="polite">
+        <div class="result-main">
+          <span id="rMainLabel" class="muted">Total</span>
+          <strong id="rMain">0,00 $</strong>
+          <span id="rSub" class="muted small"></span>
+        </div>
+        <dl id="rRows" class="rows"></dl>
+        <div class="actions">
+          <button id="copyBtn" class="btn" type="button" data-i18n="copy">Copier</button>
+          <button id="saveBtn" class="btn" type="button" data-i18n="save">Enregistrer</button>
+          <button id="resetBtn" class="btn ghost" type="button" data-i18n="reset">Effacer</button>
+        </div>
+      </div>
+
+      <div class="card" id="compareCard">
+        <h2 data-i18n="compareTitle">Comparer les pourboires</h2>
+        <div class="table-wrap">
+          <table id="compare"></table>
+        </div>
+      </div>
+
+      <div class="card" id="historyCard">
+        <div class="card-head">
+          <h2 data-i18n="historyTitle">Historique</h2>
+          <button id="clearHistory" class="btn ghost small" type="button" data-i18n="clear">Tout effacer</button>
+        </div>
+        <ul id="history" class="history"></ul>
+        <p id="historyEmpty" class="hint" data-i18n="historyEmpty">Aucun calcul enregistré pour l'instant.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="miniBar" class="mini-bar">
+    <span id="miniLabel">Total</span>
+    <strong id="miniTotal">0,00 $</strong>
+  </div>
+
+  <footer class="footer">
+    <p><span data-i18n="madeBy">Créé par</span> <strong>Aurélien Moote - Moo - 2026</strong> · <a href="https://github.com/auremoo/quebec-fees" rel="noopener">GitHub</a> · <span data-i18n="license">Licence MIT</span></p>
+    <p class="small muted" id="disclaimer" data-i18n="disclaimer">Taux indicatifs (TPS 5 %, TVQ 9,975 %). Vérifiez toujours votre reçu.</p>
+  </footer>
+
+  <dialog id="settings">
+    <form method="dialog" class="dialog-body">
+      <div class="card-head">
+        <h2 data-i18n="settings">Réglages</h2>
+        <button class="icon-btn" value="close" aria-label="Fermer">✕</button>
+      </div>
+
+      <label class="field" for="province">
+        <span data-i18n="province">Province / territoire</span>
+        <select id="province"></select>
+      </label>
+
+      <div class="field">
+        <span data-i18n="taxes">Taxes appliquées</span>
+        <div id="taxList" class="tax-list"></div>
+        <div class="row-between">
+          <button id="addTax" class="btn ghost small" type="button" data-i18n="addTax">+ Ajouter une taxe</button>
+          <span id="combinedRate" class="muted small"></span>
+        </div>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" id="cashRound">
+        <span data-i18n="cashRound">Afficher l'arrondi pour paiement comptant (0,05 $)</span>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="showCompare">
+        <span data-i18n="showCompare">Afficher le comparateur de pourboires</span>
+      </label>
+
+      <div class="field">
+        <span data-i18n="tipPresetsLabel">Pourboires rapides (%, séparés par des virgules)</span>
+        <input id="tipPresetsInput" type="text" inputmode="decimal" autocomplete="off">
+      </div>
+
+      <p class="hint" data-i18n="settingsHint">Les réglages et l'historique restent sur cet appareil (stockage local du navigateur).</p>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

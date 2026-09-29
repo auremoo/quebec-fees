@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- quebec-fees — Auteur : Aurélien Moote - Moo - 2026 — Licence MIT -->
+  <rect width="64" height="64" fill="#1b4d9b"/>
+  <path d="M16 10h32v42l-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3z" fill="#ffffff"/>
+  <circle cx="26" cy="23" r="4" fill="#1b4d9b"/>
+  <circle cx="38" cy="37" r="4" fill="#1b4d9b"/>
+  <path d="M39 19l-14 22" stroke="#1b4d9b" stroke-width="4" stroke-linecap="square"/>
+</svg>
