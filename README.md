@@ -21,6 +21,23 @@ Calculateur web de **taxes du Québec (TPS 5 % + TVQ 9,975 %)** avec pourboire, 
 - **Modulable** : préréglages de taxes pour toutes les provinces et territoires, taxes entièrement éditables (ajout / suppression / taux).
 - Français / anglais, thème clair / sombre / auto, installable sur l'écran d'accueil (manifeste PWA), aucune dépendance.
 
+## Paramètres d'URL (raccourcis iPhone, favoris)
+
+L'application peut être ouverte avec un montant prérempli :
+
+| Paramètre | Alias | Effet |
+|---|---|---|
+| `montant` | `amount`, `prix`, `price` | Mode rapide avec ce montant avant taxes (accepte `12,50` ou `12.50`) |
+| `total` | — | Mode inverse avec ce total payé |
+| `pourboire` | `tip` | Pourboire en % (0 à 100) |
+| `partage` | `split` | Nombre de personnes (1 par défaut) |
+
+Exemple : `https://auremoo.github.io/quebec-fees/?montant=42,50&pourboire=18&partage=2`
+
+Les paramètres sont retirés de l'URL une fois appliqués.
+
+**Raccourci iPhone** (app Raccourcis) : *Demander une entrée* (Nombre) → *URL* `https://auremoo.github.io/quebec-fees/?montant=` suivi de la variable *Entrée fournie* → *Ouvrir les URL*.
+
 ## Calcul
 
 Chaque taxe est calculée séparément sur le montant taxable puis arrondie au cent, comme sur un reçu :

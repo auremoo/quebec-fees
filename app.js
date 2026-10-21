@@ -173,7 +173,29 @@
     return s;
   }
 
+  // Paramètres d'URL (raccourcis iOS, favoris) : ?montant=42,50&pourboire=18&partage=2
+  // ou ?total=57,80 pour le mode inverse. Retirés de l'URL une fois appliqués.
+  function applyUrlParams(s) {
+    const params = new URLSearchParams(location.search);
+    const get = (...keys) => keys.map((k) => params.get(k)).find((v) => v != null && v.trim() !== '');
+    const amount = get('montant', 'amount', 'prix', 'price');
+    const total = get('total');
+    const tip = get('pourboire', 'tip');
+    const split = get('partage', 'split');
+    if (amount == null && total == null && tip == null && split == null) return;
+    if (amount != null) { s.mode = 'quick'; s.amount = amount.trim(); }
+    else if (total != null) { s.mode = 'reverse'; s.reverse.total = total.trim(); }
+    if (tip != null) {
+      const p = parseNum(tip);
+      if (p >= 0 && p <= 100) { s.tip.type = 'percent'; s.tip.percent = String(round2(p)); }
+    }
+    const n = split == null ? 1 : Math.floor(parseNum(split));
+    if (n >= 1) s.split = Math.min(99, n);
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (_) { /* URL inchangée */ }
+  }
+
   const state = loadState();
+  applyUrlParams(state);
   let saveTimer = null;
   function persist() {
     clearTimeout(saveTimer);
