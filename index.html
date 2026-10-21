@@ -46,6 +46,11 @@
               <span class="unit">$</span>
             </span>
           </label>
+          <div class="ops" data-target="#amount">
+            <button type="button" data-op="+">+</button>
+            <button type="button" data-op="-">−</button>
+            <button type="button" data-op="×">×</button>
+          </div>
           <p class="hint" id="exprHint" data-i18n="exprHint">Astuce : tapez 12,50+8 pour additionner plusieurs montants.</p>
         </div>
 
@@ -58,6 +63,11 @@
             <span></span>
           </div>
           <div id="items"></div>
+          <div class="ops" data-target="#items .price">
+            <button type="button" data-op="+">+</button>
+            <button type="button" data-op="-">−</button>
+            <button type="button" data-op="×">×</button>
+          </div>
           <button id="addItem" class="btn ghost full" type="button" data-i18n="addItem">+ Ajouter un article</button>
           <p class="hint" data-i18n="cartHint">Décochez « Tx » pour un article détaxé (ex. épicerie de base). Un prix négatif sert de rabais.</p>
         </div>

@@ -120,7 +120,8 @@
   // Accepte « 12,50 », « 1 234.5 », et de petites expressions « 12,50+8*2 ».
   function parseNum(value) {
     if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-    const s = String(value ?? '').replace(/[\s  $]/g, '').replace(/,/g, '.').replace(/[x×]/gi, '*');
+    const s = String(value ?? '').replace(/[\s  $]/g, '').replace(/,/g, '.').replace(/[x×]/gi, '*')
+      .replace(/[+\-*/]+$/, ''); // « 12,50+ » en cours de saisie
     if (!s || !/^[0-9.+\-*/]+$/.test(s)) return 0;
     const terms = s.match(/[+-]?[^+-]+/g) || [];
     let total = 0;
@@ -583,7 +584,39 @@
 
   /* ---------- Événements ---------- */
 
+  // Insère un opérateur dans le dernier champ actif sans fermer le clavier.
+  let lastField = null;
+  function applyOp(ops, op) {
+    const fallback = $(ops.dataset.target);
+    const input = lastField && lastField.isConnected && ops.parentElement.contains(lastField) ? lastField : fallback;
+    if (!input) return;
+    const v = input.value;
+    const start = input.selectionStart ?? v.length;
+    const end = input.selectionEnd ?? v.length;
+    input.value = v.slice(0, start) + op + v.slice(end);
+    input.focus();
+    input.setSelectionRange(start + op.length, start + op.length);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   function bind() {
+    document.addEventListener('focusin', (e) => {
+      if (e.target.matches('#amount, #items .qty, #items .price')) lastField = e.target;
+    });
+    $$('.ops').forEach((ops) => {
+      // touchstart/mousedown annulés : le champ garde le focus (et le clavier iOS reste ouvert).
+      ops.addEventListener('touchstart', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        e.preventDefault();
+        applyOp(ops, b.dataset.op);
+      }, { passive: false });
+      ops.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+      ops.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (b) applyOp(ops, b.dataset.op);
+      });
+    });
     $$('.tabs button').forEach((b) => b.addEventListener('click', () => {
       state.mode = b.dataset.mode;
       renderMode();
