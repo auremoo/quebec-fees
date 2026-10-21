@@ -35,6 +35,7 @@ L'application peut être ouverte avec un montant prérempli :
 Exemple : `https://auremoo.github.io/quebec-fees/?montant=42,50&pourboire=18&partage=2`
 
 Les paramètres sont retirés de l'URL une fois appliqués.
+Une URL entièrement encodée (`/quebec-fees/%3Fmontant%3D5`, produite par certains raccourcis) est redirigée par `404.html`.
 
 **Raccourci iPhone** (app Raccourcis) : *Demander une entrée* (Nombre) → *URL* `https://auremoo.github.io/quebec-fees/?montant=` suivi de la variable *Entrée fournie* → *Ouvrir les URL*.
 

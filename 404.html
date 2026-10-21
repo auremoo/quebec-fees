@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- quebec-fees — Auteur : Aurélien Moote - Moo - 2026 — Licence MIT -->
+<html lang="fr-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quebec Fees</title>
+  <script>
+    // Certains raccourcis iOS encodent toute l'URL : « /quebec-fees/%3Fmontant%3D5 ».
+    // On décode le chemin et on redirige vers « /quebec-fees/?montant=5 ».
+    (function () {
+      var path = location.pathname, decoded;
+      try { decoded = decodeURIComponent(path); } catch (_) { decoded = path; }
+      var i = decoded.indexOf('?');
+      if (i === -1 || decoded === path) return;
+      var base = decoded.slice(0, i).replace(/\/?$/, '/');
+      location.replace(base + decoded.slice(i) + location.hash);
+    })();
+  </script>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; margin: 0; padding: 48px 16px; text-align: center; background: #f3f5f9; color: #1a2233; }
+    a { color: #1b4d9b; }
+    @media (prefers-color-scheme: dark) { body { background: #10151f; color: #e6ebf5; } a { color: #8fb4ff; } }
+  </style>
+</head>
+<body>
+  <p>Page introuvable · Page not found</p>
+  <p><a href="./">Quebec Fees</a></p>
+</body>
+</html>
